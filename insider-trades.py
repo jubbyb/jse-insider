@@ -30,7 +30,7 @@ for i in range(1,2):
         
         # clean data and replace with commas for csv 
         cont = re.sub(',', '',cont, flags=re.IGNORECASE)
-        print(cont)
+        # print(cont)
         cont = re.sub('has.*sold', ',sold',cont, flags=re.IGNORECASE)
         cont = re.sub('has.*purchased', ',purchased',cont, flags=re.IGNORECASE)
         cont = re.sub('shares.*purchased', ',purchased',cont, flags=re.IGNORECASE)
