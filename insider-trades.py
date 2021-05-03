@@ -25,27 +25,32 @@ for i in range(1,2):
 
     for i in trade_list:
         
-        
+       
         cont = i.contents[1].text
+        
         # clean data and replace with commas for csv 
         cont = re.sub(',', '',cont, flags=re.IGNORECASE)
-
+        print(cont)
         cont = re.sub('has.*sold', ',sold',cont, flags=re.IGNORECASE)
         cont = re.sub('has.*purchased', ',purchased',cont, flags=re.IGNORECASE)
         cont = re.sub('shares.*purchased', ',purchased',cont, flags=re.IGNORECASE)
         cont = re.sub('shares.*bought', ',purchased',cont, flags=re.IGNORECASE)
         cont = re.sub('advises.*sold', ',sold',cont, flags=re.IGNORECASE)
+        cont = re.sub('acquired', ',acquired,',cont, flags=re.IGNORECASE)
         cont = re.sub('a total of', '',cont, flags=re.IGNORECASE)
         cont = re.sub('a total', '',cont, flags=re.IGNORECASE)
         cont = re.sub('shares on', ',',cont, flags=re.IGNORECASE)
         cont = re.sub('and a connected party purchased a total of', ' purchased',cont, flags=re.IGNORECASE)
         cont = re.sub('shares. The transactions were carried out between', ',',cont, flags=re.IGNORECASE)
-       
+        cont = re.sub('has advised that a purchase of', ',purchased',cont, flags=re.IGNORECASE)
         cont = re.sub('sold', 'sold ,',cont, flags=re.IGNORECASE)
         cont = re.sub('purchased', 'purchased ,',cont, flags=re.IGNORECASE)
         cont = re.sub('shares during the period', ',',cont, flags=re.IGNORECASE)
         cont = re.sub('shares held under the Employee Share Ownership Plan of the Company', '',cont, flags=re.IGNORECASE)
-        
+        cont = re.sub('has advised that a director exercised their stock options and', '',cont, flags=re.IGNORECASE)
+        cont = re.sub('shared during the period', ',',cont, flags=re.IGNORECASE)
+        cont = re.sub('shares by two directors was completed', ',',cont, flags=re.IGNORECASE)
+
         cont = re.sub('on', '',cont, flags=re.IGNORECASE)
         
         
