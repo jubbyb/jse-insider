@@ -1,0 +1,36 @@
+<!doctype html>
+<title>Hello from Flask</title>
+
+<table style="width:100%" >
+<tr>
+    <th>ASSET</th>
+    <th>ACTION</th>
+    <th>QUNANTITY</th>
+    <th>DATE</th>
+    <th>NOTES<th>
+</tr>
+{% for trade in trades %}
+    <tr>
+        {% for trans in trade %}
+        <td>{{ trans }}</td>
+        {% endfor %}
+    </tr>
+{% endfor %}
+</table>
+
+<style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
