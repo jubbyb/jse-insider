@@ -1,11 +1,10 @@
 import requests # for making standard html requests
-from bs4 import BeautifulSoup # magical tool for parsing html data
+from bs4 import BeautifulSoup, element # magical tool for parsing html data
 
 import re #regex
 
-# to do :
-#  Supreme Ventures Limited (SVL) has advised that the Company has acquired an additional 29% shareholding
-#  interest in Posttopost Betting Limited, bringing its total shareholding to 80%.
+
+
 
 def get_trades():
     page_prefix = "https://www.jamstockex.com/page/"
@@ -13,6 +12,7 @@ def get_trades():
     page_suffix = "/?s=Trading+in+Shares&tag&cat=-1&start&end" # filters for articles category and keyword "shares"
 
     tradeTotal = []
+    ticker=''
     # loop through recent x pages 
     for i in range(1,4):
         
@@ -20,57 +20,57 @@ def get_trades():
         page = requests.get(URL)
         soup = BeautifulSoup(page.text, 'html.parser')
 
-        # find all entries on page
-        trade_list = soup.find_all(class_ = 'entry-summary')
-
-
-        for i in trade_list:
-            
+        articles = soup.find_all('article')
         
-            cont = i.contents[1].text
+        for article in articles:
+            # print(article)
+
+             # find all entries on page
+            trade_summary = article.find(class_ = 'entry-summary')
+
+            #
+            trade_date = article.find(class_ = 'text-muted')
+            trade_date = trade_date.text
+            trade_date = re.sub(r'Posted: ', '',trade_date, flags=re.IGNORECASE)
+            
+            # print('trade_list',trade_summary.text)
+            summary = trade_summary.text
+            # search for content between brackets and return value without brackets 
+            ticker = re.search(r'\(([^()]*)\)',summary)
+            ticker = ticker.group(1).strip()
             
             # clean data and replace with commas for csv 
-            cont = re.sub(',', '',cont, flags=re.IGNORECASE)
+            cont = re.sub(',', '',summary, flags=re.IGNORECASE)
+            
             # print(cont)
-            cont = re.sub('has.*sold', ',sold',cont, flags=re.IGNORECASE)
-            cont = re.sub('has.*purchased', ',purchased',cont, flags=re.IGNORECASE)
-            cont = re.sub('shares.*purchased', ',purchased',cont, flags=re.IGNORECASE)
-            cont = re.sub('shares.*bought', ',purchased',cont, flags=re.IGNORECASE)
-            cont = re.sub('advises.*sold', ',sold',cont, flags=re.IGNORECASE)
-            cont = re.sub('acquired', ',acquired,',cont, flags=re.IGNORECASE)
-            cont = re.sub('a total of', '',cont, flags=re.IGNORECASE)
-            cont = re.sub('a total', '',cont, flags=re.IGNORECASE)
-            cont = re.sub('shares on', ',',cont, flags=re.IGNORECASE)
-            cont = re.sub('and a connected party purchased a total of', ' purchased',cont, flags=re.IGNORECASE)
-            cont = re.sub('shares. The transactions were carried out between', ',',cont, flags=re.IGNORECASE)
-            cont = re.sub('has advised that a purchase of', ',purchased',cont, flags=re.IGNORECASE)
-            cont = re.sub('sold', 'sold ,',cont, flags=re.IGNORECASE)
-            cont = re.sub('purchased', 'purchased ,',cont, flags=re.IGNORECASE)
-            cont = re.sub('shares during the period', ',',cont, flags=re.IGNORECASE)
-            cont = re.sub('shares held under the Employee Share Ownership Plan of the Company', '',cont, flags=re.IGNORECASE)
-            cont = re.sub('has advised that a director exercised their stock options and', '',cont, flags=re.IGNORECASE)
-            cont = re.sub('shared during the period', ',',cont, flags=re.IGNORECASE)
-            cont = re.sub('shares by two directors was completed', ',',cont, flags=re.IGNORECASE)
+            qty = re.search(r'[0-9]+',cont)
+            qty = qty.group().strip()
+            # print('summary : ', summary)
+            # print('date : ',trade_date)
+            # print('ticker : ',ticker)
+            # print('qty : ',qty)
 
-            cont = re.sub('on', '',cont, flags=re.IGNORECASE)
             
+
+            if (cont.find('purchase') !=-1 and cont.find('sold') !=-1):
+                salestatus = 'Transferred'
+            elif (cont.find('purchase') !=-1 or cont.find('acquired') !=-1):
+                salestatus = 'Purchased'
+            elif (cont.find('sold') !=-1 ):
+                salestatus = 'sold'
+            else:
+                salestatus = 'unknown'
+
+            print('side : ',salestatus)
+         
             
-            tradeTotal.append(cont.split(','))
+            arr=[ticker,salestatus,qty,trade_date,summary]
+            tradeTotal.append(arr)
+            
+    print(tradeTotal)
 
-
-    for i in tradeTotal :
-        # for a in len(i):
-        length = len(i)
-        # formatting
-        if len(i) == 3:
-            print(f"{'| ' + i[0]:<70} | {i[1]:<10} | {i[2]:<20} |")
-        elif len(i) == 4 :
-            print(f"{'| ' + i[0]:<70} | {i[1]:<10} | {i[2]:<20} | {i[3]:<25} |")
-        elif len(i) == 5:
-            print(f"{'| ' + i[0]:<70} | {i[1]:<10} | {i[2]:<20} | {i[3]:<25} | {i[4]:<25} |")
-        elif len(i) == 6:
-            print(f"{'| ' + i[0]:<70} | {i[1]:<10} | {i[2]:<20} | {i[3]:<25} | {i[4]:<25} | {i[4]:<25} |")  
-        else :
-            print(i)
+    
     
     return tradeTotal
+
+get_trades()
